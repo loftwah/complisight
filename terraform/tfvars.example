@@ -1,0 +1,6 @@
+vpc_id        = "vpc-12345678"
+subnet_ids    = ["subnet-12345", "subnet-67890"]
+aws_account_id = "1234567890"
+master_username = "admin"
+master_password = "Very$ecretP@ssw0rd"
+region          = "ap-southeast-2"

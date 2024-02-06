@@ -1,23 +1,52 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"log"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/spf13/cobra"
 )
 
-// confidentialityCmd represents the confidentiality command
 var confidentialityCmd = &cobra.Command{
 	Use:   "confidentiality",
-	Short: "Verify confidentiality measures for your Ruby on Rails application on AWS",
-	Long: `This command checks how the application manages and protects sensitive data,
-ensuring compliance with SOC2's confidentiality criteria. This includes data encryption,
-access controls, and data classification practices.`,
+	Short: "Check confidentiality compliance for AWS resources",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("🔒 Confidentiality assessment is underway...")
-		// Placeholder for confidentiality check logic
-		fmt.Println("✅ Confidentiality assessment complete. Check the detailed report for more information.")
+		ctx := context.TODO()
+		cfg, err := config.LoadDefaultConfig(ctx)
+		if err != nil {
+			log.Fatalf("Unable to load AWS SDK config, %v", err)
+		}
+
+		checkS3BucketEncryption(ctx, cfg)
 	},
+}
+
+func checkS3BucketEncryption(ctx context.Context, cfg aws.Config) {
+	s3Client := s3.NewFromConfig(cfg)
+
+	// List all S3 buckets
+	buckets, err := s3Client.ListBuckets(ctx, &s3.ListBucketsInput{})
+	if err != nil {
+		log.Fatalf("Unable to list S3 buckets: %v", err)
+	}
+
+	for _, bucket := range buckets.Buckets {
+		// Check encryption on each bucket
+		bucketName := aws.ToString(bucket.Name)
+		result, err := s3Client.GetBucketEncryption(ctx, &s3.GetBucketEncryptionInput{
+			Bucket: aws.String(bucketName),
+		})
+
+		if err != nil {
+			fmt.Printf("Bucket %s does not have encryption enabled or it cannot be verified: %v\n", bucketName, err)
+		} else {
+			fmt.Printf("Bucket %s has encryption enabled with %s algorithm.\n", bucketName, result.ServerSideEncryptionConfiguration.Rules[0].ApplyServerSideEncryptionByDefault.SSEAlgorithm)
+		}
+	}
 }
 
 func init() {

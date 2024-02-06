@@ -58,6 +58,18 @@ This documentation outlines the SOC2 Compliance Checker CLI tool designed for as
 * **Features:** Runs all checks sequentially for a comprehensive compliance assessment.
 * **Implementation:** Potentially in `assess.go`, orchestrating calls to individual checks.
 
+## Usage
+
+### **Configure AWS Credentials**
+
+The AWS SDK for Go requires credentials (AWS access key ID and secret access key) to interact with AWS services. You can configure credentials in several ways:
+
+* **Environment Variables:** Set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`, and optionally, `AWS_SESSION_TOKEN`.
+
+* **Shared Credentials File:** Typically located at `~/.aws/credentials` on Linux and macOS, or `%USERPROFILE%\.aws\credentials` on Windows.
+
+* **IAM Role:** When running on AWS services such as EC2, ECS, or Lambda, you can assign an IAM role with appropriate permissions to the service.
+
 ## Reporting and SOC2 Report Types
 
 ### **Output and Reporting:**

@@ -1,23 +1,60 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"log"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 	"github.com/spf13/cobra"
 )
 
-// integrityCmd represents the integrity command
 var integrityCmd = &cobra.Command{
 	Use:   "integrity",
-	Short: "Assess the processing integrity of your application on AWS",
-	Long: `This command ensures the application's data processing is accurate, complete,
-and authorized, in line with SOC2's processing integrity criteria. It covers data handling,
-validation, and error checking processes.`,
+	Short: "Check integrity compliance for AWS resources",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("✅ Integrity check initiated: Validating data processing and accuracy...")
-		// Placeholder for integrity check logic
-		fmt.Println("✅ Integrity assessment complete. Review the findings for any action items.")
+		ctx := context.TODO()
+		cfg, err := config.LoadDefaultConfig(ctx)
+		if err != nil {
+			log.Fatalf("Unable to load AWS SDK config, %v", err)
+		}
+
+		checkCloudTrail(ctx, cfg)
 	},
+}
+
+func checkCloudTrail(ctx context.Context, cfg aws.Config) {
+	ctClient := cloudtrail.NewFromConfig(cfg)
+
+	// List all trails
+	trails, err := ctClient.DescribeTrails(ctx, &cloudtrail.DescribeTrailsInput{})
+	if err != nil {
+		log.Fatalf("Unable to describe CloudTrail trails: %v", err)
+	}
+
+	if len(trails.TrailList) == 0 {
+		fmt.Println("No CloudTrail trails found. Compliance check failed.")
+		return
+	}
+
+	for _, trail := range trails.TrailList {
+		// Check if the trail is logging
+		status, err := ctClient.GetTrailStatus(ctx, &cloudtrail.GetTrailStatusInput{
+			Name: trail.TrailARN,
+		})
+		if err != nil {
+			fmt.Printf("Unable to get status for trail %s: %v\n", *trail.Name, err)
+			continue
+		}
+
+		if status.IsLogging {
+			fmt.Printf("Trail %s is enabled and logging.\n", *trail.Name)
+		} else {
+			fmt.Printf("Trail %s is not logging. Compliance check failed.\n", *trail.Name)
+		}
+	}
 }
 
 func init() {

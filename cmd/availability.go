@@ -1,36 +1,49 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"log"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/spf13/cobra"
 )
 
-// availabilityCmd represents the availability check command
 var availabilityCmd = &cobra.Command{
 	Use:   "availability",
-	Short: "Assess the availability of the Ruby on Rails application on AWS",
-	Long: `This command evaluates the AWS-hosted Ruby on Rails application's 
-availability against SOC2 standards, focusing on disaster recovery, backup strategies, 
-and network performance to ensure high availability and resilience.`,
+	Short: "Check availability compliance for RDS instances",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Example start of an implementation
-		fmt.Println("🚀 Availability assessment is underway...")
+		ctx := context.TODO()
+		cfg, err := config.LoadDefaultConfig(ctx)
+		if err != nil {
+			log.Fatalf("Unable to load AWS SDK config, %v", err)
+		}
 
-		// Hypothetical check for disaster recovery setup
-		fmt.Println("Checking disaster recovery strategies...")
-		// Placeholder: Insert logic to check AWS configurations or application settings
-
-		// Hypothetical check for backup strategies
-		fmt.Println("Verifying backup strategies...")
-		// Placeholder: Insert logic to verify backups are in place and tested
-
-		// Hypothetical check for network performance
-		fmt.Println("Assessing network performance and uptime...")
-		// Placeholder: Insert logic to monitor network performance against SOC2 criteria
-
-		fmt.Println("✅ Availability assessment complete. Review the report for details and recommendations.")
+		checkRDSMultiAZ(ctx, cfg)
 	},
+}
+
+func checkRDSMultiAZ(ctx context.Context, cfg aws.Config) {
+	rdsClient := rds.NewFromConfig(cfg)
+
+	// List all RDS instances
+	paginator := rds.NewDescribeDBInstancesPaginator(rdsClient, &rds.DescribeDBInstancesInput{})
+	for paginator.HasMorePages() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			log.Fatalf("Unable to describe RDS instances: %v", err)
+		}
+		for _, instance := range page.DBInstances {
+			// Check if the RDS instance is Multi-AZ
+			if instance.MultiAZ {
+				fmt.Printf("RDS instance %s is deployed in Multi-AZ configuration.\n", *instance.DBInstanceIdentifier)
+			} else {
+				fmt.Printf("RDS instance %s is not deployed in Multi-AZ configuration.\n", *instance.DBInstanceIdentifier)
+			}
+		}
+	}
 }
 
 func init() {
