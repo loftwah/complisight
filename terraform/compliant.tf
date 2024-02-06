@@ -5,12 +5,7 @@ provider "aws" {
 resource "random_pet" "name" {}
 
 resource "aws_s3_bucket" "compliant_bucket" {
-  bucket_prefix = "compliant-bucket-${random_pet.name.id}"
-}
-
-resource "aws_s3_bucket_acl" "compliant_bucket_acl" {
-  bucket = aws_s3_bucket.compliant_bucket.id
-  acl    = "private"
+  bucket_prefix = "compliant-bucket-"
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "compliant_bucket_sse" {
@@ -28,16 +23,16 @@ resource "aws_kms_key" "rds_encryption_key" {
 }
 
 resource "aws_rds_cluster" "compliant_rds" {
-  engine                     = "aurora-postgresql"
-  engine_version             = "13.4"
-  cluster_identifier         = "compliant-rds-cluster-${random_pet.name.id}" # Use cluster_identifier
-  master_username            = var.master_username
-  master_password            = var.master_password
-  skip_final_snapshot        = true
-  storage_encrypted          = true
-  kms_key_id                 = aws_kms_key.rds_encryption_key.arn
-  db_subnet_group_name       = aws_db_subnet_group.example.name
-  vpc_security_group_ids     = [aws_security_group.example.id]
+  engine                  = "aurora-postgresql"
+  engine_version          = "16.1"
+  cluster_identifier      = "compliant-rds-cluster-${random_pet.name.id}"
+  master_username         = var.master_username
+  master_password         = var.master_password
+  skip_final_snapshot     = true
+  storage_encrypted       = true
+  kms_key_id              = aws_kms_key.rds_encryption_key.arn
+  db_subnet_group_name    = aws_db_subnet_group.example.name
+  vpc_security_group_ids  = [aws_security_group.example.id]
 }
 
 resource "aws_db_subnet_group" "example" {

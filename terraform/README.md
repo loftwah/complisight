@@ -25,6 +25,21 @@ Get your AWS region using the AWS CLI:
 aws configure get region
 ```
 
+Get your VPC and subnet IDs using the AWS CLI:
+
+```bash
+aws ec2 describe-vpcs --query "Vpcs[].VpcId" --output text # or
+aws ec2 describe-vpcs --region ap-southeast-2 --query "Vpcs[].VpcId" --output text
+```
+
+Get your subnet IDs using the AWS CLI:
+
+```bash
+aws ec2 describe-subnets --filters "Name=vpc-id,Values=<VPC-ID>" --query "Subnets[].SubnetId" --output text # or
+aws ec2 describe-subnets --region ap-southeast-2 --filters "Name=vpc-id,Values=<VPC-ID>" --query "Subnets[].SubnetId" --output text
+```
+
+
 ## Variables
 
 - `aws_account_id` (required): Your AWS account ID for the KMS key policy.
