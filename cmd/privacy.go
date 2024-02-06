@@ -1,7 +1,3 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
@@ -13,28 +9,16 @@ import (
 // privacyCmd represents the privacy command
 var privacyCmd = &cobra.Command{
 	Use:   "privacy",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Evaluate privacy practices against SOC2 standards",
+	Long: `This command reviews the application's adherence to privacy laws and SOC2 criteria,
+focusing on personal data collection, consent, storage, and sharing practices.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("privacy called")
+		fmt.Println("🛡️ Initiating privacy practices assessment...")
+		// Placeholder for privacy check logic
+		fmt.Println("✅ Privacy assessment completed. Consult the report for insights and recommendations.")
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(privacyCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// privacyCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// privacyCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

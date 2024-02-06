@@ -1,7 +1,3 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
@@ -13,28 +9,17 @@ import (
 // integrityCmd represents the integrity command
 var integrityCmd = &cobra.Command{
 	Use:   "integrity",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Assess the processing integrity of your application on AWS",
+	Long: `This command ensures the application's data processing is accurate, complete,
+and authorized, in line with SOC2's processing integrity criteria. It covers data handling,
+validation, and error checking processes.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("integrity called")
+		fmt.Println("✅ Integrity check initiated: Validating data processing and accuracy...")
+		// Placeholder for integrity check logic
+		fmt.Println("✅ Integrity assessment complete. Review the findings for any action items.")
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(integrityCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// integrityCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// integrityCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

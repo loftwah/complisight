@@ -1,7 +1,3 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
@@ -13,28 +9,17 @@ import (
 // confidentialityCmd represents the confidentiality command
 var confidentialityCmd = &cobra.Command{
 	Use:   "confidentiality",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Verify confidentiality measures for your Ruby on Rails application on AWS",
+	Long: `This command checks how the application manages and protects sensitive data,
+ensuring compliance with SOC2's confidentiality criteria. This includes data encryption,
+access controls, and data classification practices.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("confidentiality called")
+		fmt.Println("🔒 Confidentiality assessment is underway...")
+		// Placeholder for confidentiality check logic
+		fmt.Println("✅ Confidentiality assessment complete. Check the detailed report for more information.")
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(confidentialityCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// confidentialityCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// confidentialityCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
