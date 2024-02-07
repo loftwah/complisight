@@ -49,3 +49,5 @@ go.work
 *.swo
 *.bak
 *.bak[0-9]*
+
+.env

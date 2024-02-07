@@ -1,11 +1,17 @@
-/*
-Copyright © 2024 Dean Lofts <dean@deanlofts.xyz>
-
-*/
 package main
 
-import "github.com/loftwah/soc2/cmd"
+import (
+	"log"
+
+	"github.com/joho/godotenv"
+	"github.com/loftwah/soc2/cmd"
+)
 
 func main() {
+	// Load .env file
+	if err := godotenv.Load(); err != nil {
+		log.Printf("Warning: No .env file found")
+	}
+
 	cmd.Execute()
 }

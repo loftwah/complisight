@@ -11,6 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.48.1
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.42.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.21.1
+	github.com/joho/godotenv v1.5.1
 	github.com/spf13/cobra v1.8.0
 )
 
