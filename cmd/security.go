@@ -8,10 +8,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3control"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/spf13/cobra"
 )
 
-// Assume this global variable is set up elsewhere, like in your main.go or during command initialization
 var awsConfig aws.Config
 
 var securityCmd = &cobra.Command{
@@ -32,7 +33,6 @@ var securityCmd = &cobra.Command{
 func checkS3Buckets(ctx context.Context) {
 	s3Client := s3.NewFromConfig(awsConfig)
 
-	// List all S3 buckets
 	buckets, err := s3Client.ListBuckets(ctx, &s3.ListBucketsInput{})
 	if err != nil {
 		log.Fatalf("Unable to list buckets: %v", err)
@@ -40,16 +40,12 @@ func checkS3Buckets(ctx context.Context) {
 
 	for _, bucket := range buckets.Buckets {
 		fmt.Printf("Checking bucket: %s\n", aws.ToString(bucket.Name))
-		// Placeholder for bucket encryption and public access checks
-		// In practice, you'd call your S3Service methods here
 		checkBucketEncryption(ctx, s3Client, aws.ToString(bucket.Name))
-		checkBucketPublicAccessBlock(ctx, s3Client, aws.ToString(bucket.Name))
+		checkBucketPublicAccessBlock(ctx, awsConfig, aws.ToString(bucket.Name))
 	}
 }
 
 func checkBucketEncryption(ctx context.Context, s3Client *s3.Client, bucketName string) {
-	// Example function to check bucket encryption
-	// This is a simplified version; actual implementation may vary
 	result, err := s3Client.GetBucketEncryption(ctx, &s3.GetBucketEncryptionInput{
 		Bucket: aws.String(bucketName),
 	})
@@ -60,15 +56,23 @@ func checkBucketEncryption(ctx context.Context, s3Client *s3.Client, bucketName 
 	}
 }
 
-func checkBucketPublicAccessBlock(ctx context.Context, s3Client *s3.Client, bucketName string) {
-	// Example function to check bucket public access block
-	result, err := s3Client.GetBucketPublicAccessBlock(ctx, &s3.GetBucketPublicAccessBlockInput{
-		Bucket: aws.String(bucketName),
-	})
+func checkBucketPublicAccessBlock(ctx context.Context, cfg aws.Config, bucketName string) {
+	stsClient := sts.NewFromConfig(cfg)
+	identity, err := stsClient.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
 	if err != nil {
-		fmt.Println("Bucket public access block is not enabled or unable to check:", bucketName)
+		log.Fatalf("Unable to get AWS account ID: %v", err)
+	}
+
+	s3ControlClient := s3control.NewFromConfig(cfg)
+	input := &s3control.GetPublicAccessBlockInput{
+		AccountId: identity.Account,
+	}
+
+	result, err := s3ControlClient.GetPublicAccessBlock(ctx, input)
+	if err != nil {
+		fmt.Printf("Unable to check public access block for account %s: %v\n", *identity.Account, err)
 	} else {
-		fmt.Printf("Bucket public access block is enabled for %s\n", bucketName)
+		fmt.Printf("Public access block configuration for account %s: %+v\n", *identity.Account, result.PublicAccessBlockConfiguration)
 	}
 }
 

@@ -40,3 +40,25 @@ func (s *S3Service) ListBuckets(ctx context.Context) ([]string, error) {
 
 	return buckets, nil
 }
+
+// CheckBucketEncryption checks the bucket encryption settings
+func (s *S3Service) CheckBucketEncryption(ctx context.Context, bucketName string) (*s3.GetBucketEncryptionOutput, error) {
+	result, err := s.Client.GetBucketEncryption(ctx, &s3.GetBucketEncryptionInput{
+		Bucket: aws.String(bucketName),
+	})
+	if err != nil {
+		return nil, err // Returning the error for further handling
+	}
+	return result, nil
+}
+
+// CheckBucketPublicAccessBlock checks the bucket's public access block settings
+func (s *S3Service) CheckBucketPublicAccessBlock(ctx context.Context, bucketName string) (*s3.GetBucketPublicAccessBlockOutput, error) {
+	result, err := s.Client.GetBucketPublicAccessBlock(ctx, &s3.GetBucketPublicAccessBlockInput{
+		Bucket: aws.String(bucketName),
+	})
+	if err != nil {
+		return nil, err // Returning the error for further handling
+	}
+	return result, nil
+}

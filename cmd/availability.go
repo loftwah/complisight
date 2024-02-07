@@ -36,8 +36,8 @@ func checkRDSMultiAZ(ctx context.Context, cfg aws.Config) {
 			log.Fatalf("Unable to describe RDS instances: %v", err)
 		}
 		for _, instance := range page.DBInstances {
-			// Check if the RDS instance is Multi-AZ
-			if instance.MultiAZ {
+			// Correctly dereference the pointer for the MultiAZ field
+			if aws.ToBool(instance.MultiAZ) {
 				fmt.Printf("RDS instance %s is deployed in Multi-AZ configuration.\n", *instance.DBInstanceIdentifier)
 			} else {
 				fmt.Printf("RDS instance %s is not deployed in Multi-AZ configuration.\n", *instance.DBInstanceIdentifier)

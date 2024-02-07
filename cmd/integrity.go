@@ -42,14 +42,14 @@ func checkCloudTrail(ctx context.Context, cfg aws.Config) {
 	for _, trail := range trails.TrailList {
 		// Check if the trail is logging
 		status, err := ctClient.GetTrailStatus(ctx, &cloudtrail.GetTrailStatusInput{
-			Name: trail.TrailARN,
+			Name: aws.String(*trail.TrailARN),
 		})
 		if err != nil {
 			fmt.Printf("Unable to get status for trail %s: %v\n", *trail.Name, err)
 			continue
 		}
 
-		if status.IsLogging {
+		if aws.ToBool(status.IsLogging) {
 			fmt.Printf("Trail %s is enabled and logging.\n", *trail.Name)
 		} else {
 			fmt.Printf("Trail %s is not logging. Compliance check failed.\n", *trail.Name)
