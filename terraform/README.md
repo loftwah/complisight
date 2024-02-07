@@ -50,14 +50,15 @@ aws ec2 describe-subnets --region ap-southeast-2 --filters "Name=vpc-id,Values=<
 
 Initialize Terraform:
 
-````bash
+```bash
 terraform init
+```
 
 Plan the deployment:
 
 ```bash
 terraform plan
-````
+```
 
 Apply the configuration:
 
