@@ -52,7 +52,7 @@ func checkCloudTrail(ctx context.Context, cfg aws.Config) {
 		if aws.ToBool(status.IsLogging) {
 			fmt.Printf("Trail %s is enabled and logging.\n", *trail.Name)
 		} else {
-			fmt.Printf("Trail %s is not logging. Compliance check failed.\n", *trail.Name)
+			fmt.Printf("Trail %s is not logging. It may be managed outside of this account, or not configured correctly. Verify its configuration, especially if managed at the organizational level.\n", *trail.Name)
 		}
 	}
 }
