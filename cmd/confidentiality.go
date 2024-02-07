@@ -60,7 +60,7 @@ func checkS3BucketEncryption(ctx context.Context, cfg aws.Config) {
 			})
 
 			if err != nil {
-				fmt.Printf("Bucket %s in region %s fails confidentiality compliance: Encryption is not enabled or cannot be verified.\n", *bucket.Name, bucketRegion)
+				fmt.Printf("Bucket %s in region %s does not pass confidentiality compliance: Encryption is not enabled or cannot be verified.\n", *bucket.Name, bucketRegion)
 			} else {
 				fmt.Printf("Bucket %s in region %s passes confidentiality compliance: Encryption is enabled.\n", *bucket.Name, bucketRegion)
 			}
