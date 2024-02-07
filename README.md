@@ -2,6 +2,8 @@
 
 **CompliSight**: Revolutionizing Compliance Management with Automation and Insight
 
+![Complisight](https://github.com/loftwah/complisight/assets/19922556/ceba8d0f-c638-4e2d-bee4-03528a4c3ade)
+
 In an era where digital transformation accelerates, regulatory landscapes evolve, and the stakes for information security compliance have never been higher, CompliSight emerges as the game-changer. Our cutting-edge platform is designed to demystify and automate the complex world of compliance, starting with SOC2 and expanding to a comprehensive suite of information security standards.
 
 CompliSight leverages the latest in automation technology, cloud computing, and AI to offer a seamless, intuitive experience that simplifies compliance checks, reporting, and management across multiple frameworks. With CompliSight, businesses can effortlessly navigate the intricacies of SOC2, GDPR, HIPAA, and beyond, ensuring that compliance is no longer a bottleneck but a catalyst for growth and trust.
