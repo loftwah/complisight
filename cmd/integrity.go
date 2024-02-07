@@ -11,21 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var integrityCmd = &cobra.Command{
-	Use:   "integrity",
-	Short: "Check integrity compliance for AWS resources",
-	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.TODO()
-		cfg, err := config.LoadDefaultConfig(ctx)
-		if err != nil {
-			log.Fatalf("Unable to load AWS SDK config, %v", err)
-		}
-
-		checkCloudTrail(ctx, cfg)
-	},
-}
-
-func checkCloudTrail(ctx context.Context, cfg aws.Config) {
+// performIntegrityCheck encapsulates the integrity check logic
+func performIntegrityCheck(ctx context.Context, cfg aws.Config) {
 	ctClient := cloudtrail.NewFromConfig(cfg)
 
 	// List all trails
@@ -52,9 +39,22 @@ func checkCloudTrail(ctx context.Context, cfg aws.Config) {
 		if aws.ToBool(status.IsLogging) {
 			fmt.Printf("Trail %s is enabled and logging.\n", *trail.Name)
 		} else {
-			fmt.Printf("Trail %s is not logging. It may be managed outside of this account, or not configured correctly. Verify its configuration, especially if managed at the organizational level.\n", *trail.Name)
+			fmt.Printf("Trail %s is not logging.\n", *trail.Name)
 		}
 	}
+}
+
+var integrityCmd = &cobra.Command{
+	Use:   "integrity",
+	Short: "Check integrity compliance for AWS resources",
+	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.TODO()
+		cfg, err := config.LoadDefaultConfig(ctx)
+		if err != nil {
+			log.Fatalf("Unable to load AWS SDK config, %v", err)
+		}
+		performIntegrityCheck(ctx, cfg)
+	},
 }
 
 func init() {

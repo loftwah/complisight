@@ -11,21 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var availabilityCmd = &cobra.Command{
-	Use:   "availability",
-	Short: "Check availability compliance for RDS instances",
-	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.TODO()
-		cfg, err := config.LoadDefaultConfig(ctx)
-		if err != nil {
-			log.Fatalf("Unable to load AWS SDK config, %v", err)
-		}
-
-		checkRDSMultiAZ(ctx, cfg)
-	},
-}
-
-func checkRDSMultiAZ(ctx context.Context, cfg aws.Config) {
+// This is the new function that encapsulates the availability check logic
+func performAvailabilityCheck(ctx context.Context, cfg aws.Config) {
 	rdsClient := rds.NewFromConfig(cfg)
 
 	// List all RDS instances
@@ -36,7 +23,6 @@ func checkRDSMultiAZ(ctx context.Context, cfg aws.Config) {
 			log.Fatalf("Unable to describe RDS instances: %v", err)
 		}
 		for _, instance := range page.DBInstances {
-			// Correctly dereference the pointer for the MultiAZ field
 			if aws.ToBool(instance.MultiAZ) {
 				fmt.Printf("RDS instance %s is deployed in Multi-AZ configuration.\n", *instance.DBInstanceIdentifier)
 			} else {
@@ -44,6 +30,19 @@ func checkRDSMultiAZ(ctx context.Context, cfg aws.Config) {
 			}
 		}
 	}
+}
+
+var availabilityCmd = &cobra.Command{
+	Use:   "availability",
+	Short: "Check availability compliance for RDS instances",
+	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.TODO()
+		cfg, err := config.LoadDefaultConfig(ctx)
+		if err != nil {
+			log.Fatalf("Unable to load AWS SDK config, %v", err)
+		}
+		performAvailabilityCheck(ctx, cfg)
+	},
 }
 
 func init() {

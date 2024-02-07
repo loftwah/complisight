@@ -12,21 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var privacyCmd = &cobra.Command{
-	Use:   "privacy",
-	Short: "Check privacy compliance for AWS resources",
-	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.TODO()
-		cfg, err := config.LoadDefaultConfig(ctx)
-		if err != nil {
-			log.Fatalf("Unable to load AWS SDK config, %v", err)
-		}
-
-		checkS3BucketPrivacy(ctx, cfg)
-	},
-}
-
-func checkS3BucketPrivacy(ctx context.Context, cfg aws.Config) {
+// performPrivacyCheck encapsulates the privacy check logic
+func performPrivacyCheck(ctx context.Context, cfg aws.Config) {
 	s3Client := s3.NewFromConfig(cfg)
 
 	buckets, err := s3Client.ListBuckets(ctx, &s3.ListBucketsInput{})
@@ -50,9 +37,6 @@ func checkS3BucketPrivacy(ctx context.Context, cfg aws.Config) {
 			passes = false
 		}
 
-		// Check public access block - adjust this part according to the correct API if needed
-		publicAccessStatus := "Public Access Check Skipped" // Placeholder, adjust based on actual API availability and your requirements
-
 		// Simplified policy check
 		policyStatus := "No Policy"
 		getPolicyOutput, err := s3Client.GetBucketPolicy(ctx, &s3.GetBucketPolicyInput{
@@ -70,12 +54,24 @@ func checkS3BucketPrivacy(ctx context.Context, cfg aws.Config) {
 		if passes {
 			status = "PASS"
 		}
-		fmt.Printf("Bucket: %s, Encryption: %s, Public Access: %s, Policy: %s, Compliance Status: %s\n", bucketName, encryptionStatus, publicAccessStatus, policyStatus, status)
+		fmt.Printf("Bucket: %s, Encryption: %s, Policy: %s, Compliance Status: %s\n", bucketName, encryptionStatus, policyStatus, status)
 	}
 }
 
+var privacyCmd = &cobra.Command{
+	Use:   "privacy",
+	Short: "Check privacy compliance for AWS resources",
+	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.TODO()
+		cfg, err := config.LoadDefaultConfig(ctx)
+		if err != nil {
+			log.Fatalf("Unable to load AWS SDK config, %v", err)
+		}
+		performPrivacyCheck(ctx, cfg)
+	},
+}
+
 func containsHttps(policy string) bool {
-	// Real policy check logic should be more comprehensive, considering actual security requirements
 	return strings.Contains(policy, "https")
 }
 
