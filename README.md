@@ -60,3 +60,44 @@ Our mission is clear: to empower organizations of all sizes to achieve and maint
 - **Vendor Management**: Conduct risk assessments on third-party services to ensure they meet SOC2 standards.
 
 By leveraging CompliSight for comprehensive SOC2 compliance management, organizations can ensure a robust security posture, streamline compliance processes, and foster trust with clients and stakeholders. Continuous monitoring, regular audits, and adherence to best practices are pivotal in maintaining compliance and securing sensitive data across all operational environments.
+
+## Phase 1: Initial SOC2 Compliance Data Collection
+
+The `phase1.sh` script is a comprehensive tool designed for the initial collection of AWS resource configurations, aiding in SOC2 compliance assessments. This script automates the retrieval of configurations and settings from a wide range of AWS services, ensuring a thorough review of the environment against SOC2 requirements.
+
+### How It Works
+
+Upon execution, `phase1.sh` performs the following actions:
+
+1. **Directory Setup**: Creates a `./data` directory to store the output of collected AWS service data.
+
+2. **Logging**: Establishes a logging mechanism to capture both stdout and stderr, saving the output to a timestamped log file within the `./data` directory.
+
+3. **Data Collection**: Utilizes AWS CLI commands to collect data across multiple AWS services, including IAM, EC2, S3, RDS, ElastiCache, KMS, VPC, CloudTrail, CloudFormation, Config, CloudWatch, Lambda, SecretsManager, ELB, ECS, ECR, SNS, SQS, Kinesis, DynamoDB, and Redshift.
+
+   * **Enhanced S3 Data Collection**: Employs parallel processing to efficiently collect policy, versioning, and logging configurations for each S3 bucket.
+   * **ECS Cluster Checks**: Improved to handle multiple clusters, collecting service information for each identified ECS cluster.
+   * **GuardDuty Detector Checks**: Verifies the existence of GuardDuty detectors and collects findings if available.
+
+### Usage
+
+To run the script:
+
+1. Ensure you have the AWS CLI installed and configured with appropriate access permissions.
+2. Navigate to the directory containing `phase1.sh`.
+3. Make the script executable: `chmod +x phase1.sh`.
+4. Execute the script: `./phase1.sh`.
+   * Optionally, specify AWS regions as arguments if you wish to collect data from specific regions only. `./phase.sh ap-southeast-2 us-west-1 eu-west1`.
+
+### Output
+
+* The script outputs data into JSON files within the `./data` directory, organizing them by service and AWS region.
+* A detailed log file captures the execution process, including any errors encountered during data collection.
+
+### Advantages
+
+* **Automation**: Streamlines the initial data collection process, saving time and reducing manual effort.
+* **Comprehensive Coverage**: Ensures a wide range of AWS services are audited, facilitating a thorough SOC2 compliance assessment.
+* **Flexibility**: Allows for targeted data collection across specified AWS regions.
+
+This script is an essential part of the SOC2 compliance toolkit, offering a solid foundation for subsequent analysis and remediation efforts.
