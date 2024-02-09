@@ -84,10 +84,12 @@ for REGION in $REGIONS; do
     collect_service_data "$REGION" "Lambda" "aws lambda list-functions" "lambda-functions"
     collect_service_data "$REGION" "SecretsManager" "aws secretsmanager list-secrets" "secretsmanager-secrets"
     collect_service_data "$REGION" "ELB" "aws elb describe-load-balancers" "elb-load-balancers"
-    # Handle ECS with an existence check for clusters
+    # ECS cluster check improved for multiple clusters
     local ecs_clusters=$(aws ecs list-clusters --region "$REGION" --query "clusterArns[]" --output text)
     if [ -n "$ecs_clusters" ]; then
-        collect_service_data "$REGION" "ECS" "aws ecs list-services --cluster $ecs_clusters" "ecs-services"
+        for cluster_arn in $ecs_clusters; do
+            collect_service_data "$REGION" "ECS" "aws ecs list-services --cluster $cluster_arn" "ecs-services-${cluster_arn##*/}"
+        done
     else
         echo "No ECS clusters found in $REGION."
     fi
@@ -100,12 +102,12 @@ for REGION in $REGIONS; do
     collect_service_data "$REGION" "CloudWatch" "aws logs describe-log-groups" "cloudwatch-log-groups"
 
     # GuardDuty handling improved to check for detector existence
-    local detector_id=$(aws guardduty list-detectors --region "$REGION" --query "DetectorIds[0]" --output text 2>/dev/null)
-    if [ -n "$detector_id" ]; then
-        collect_service_data "$REGION" "GuardDuty" "aws guardduty list-findings --detector-id $detector_id" "guardduty-findings"
-    else
-        echo "No GuardDuty detector found in $REGION."
-    fi
+detector_id=$(aws guardduty list-detectors --region "$REGION" --query "DetectorIds[0]" --output text 2>/dev/null)
+if [ -n "$detector_id" ]; then
+    collect_service_data "$REGION" "GuardDuty" "aws guardduty list-findings --detector-id $detector_id" "guardduty-findings"
+else
+    echo "No GuardDuty detector found in $REGION."
+fi
 done
 
 echo "Data collection completed."
