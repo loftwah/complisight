@@ -10,7 +10,9 @@ LOG_FILE="${OUTPUT_DIR}/script_output_$(date +%Y-%m-%d_%H-%M-%S).log"
 # Redirect stdout and stderr to log file
 exec > >(tee "$LOG_FILE") 2>&1
 
-# Function to retrieve and save AWS service data
+echo "Starting SOC2 Compliance Data Collection..."
+
+# Function to handle service data collection with error checking
 collect_service_data() {
     local region=$1
     local service=$2
@@ -19,7 +21,7 @@ collect_service_data() {
     local AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text --region "$region")
     local output_file="${OUTPUT_DIR}/output-${AWS_ACCOUNT_ID}-${region}-${file_suffix}.json"
 
-    # Append timestamp if file exists to prevent overwriting
+    # Append timestamp if file exists
     if [ -f "$output_file" ]; then
         local timestamp=$(date +%Y-%m-%d_%H-%M-%S)
         output_file="${OUTPUT_DIR}/output-${AWS_ACCOUNT_ID}-${region}-${file_suffix}-${timestamp}.json"
@@ -33,7 +35,7 @@ collect_service_data() {
     fi
 }
 
-# Function to collect S3 bucket data with enhanced checks
+# Enhanced S3 data collection with parallel processing
 collect_s3_data() {
     local region=$1
     local buckets=$(aws s3api list-buckets --query 'Buckets[].Name' --output text --region "$region")
@@ -57,15 +59,15 @@ collect_s3_data() {
     wait
 }
 
-# Regions to collect data from; if none specified, use default region
+# Replace the regions collection logic if necessary, or keep as is for simplicity
 REGIONS="${@:-$(aws configure get region)}"
 echo "Collecting data in regions: $REGIONS"
 
-# Main collection loop with added services
+# Main collection loop - Enhanced with better structure and additional services
 for REGION in $REGIONS; do
     echo "Processing region: $REGION"
     
-    # IAM, EC2, RDS, and more
+    # Your existing and new service data collection calls
     collect_service_data "$REGION" "IAM" "aws iam list-users" "iam-users"
     collect_service_data "$REGION" "IAM" "aws iam list-roles" "iam-roles"
     collect_service_data "$REGION" "EC2" "aws ec2 describe-instances" "ec2-instances"
@@ -81,9 +83,14 @@ for REGION in $REGIONS; do
     collect_service_data "$REGION" "CloudWatch" "aws cloudwatch describe-alarms" "cloudwatch-alarms"
     collect_service_data "$REGION" "Lambda" "aws lambda list-functions" "lambda-functions"
     collect_service_data "$REGION" "SecretsManager" "aws secretsmanager list-secrets" "secretsmanager-secrets"
-    # Additions
     collect_service_data "$REGION" "ELB" "aws elb describe-load-balancers" "elb-load-balancers"
-    collect_service_data "$REGION" "ECS" "aws ecs list-services" "ecs-services"
+    # Handle ECS with an existence check for clusters
+    local ecs_clusters=$(aws ecs list-clusters --region "$REGION" --query "clusterArns[]" --output text)
+    if [ -n "$ecs_clusters" ]; then
+        collect_service_data "$REGION" "ECS" "aws ecs list-services --cluster $ecs_clusters" "ecs-services"
+    else
+        echo "No ECS clusters found in $REGION."
+    fi
     collect_service_data "$REGION" "ECR" "aws ecr describe-repositories" "ecr-repositories"
     collect_service_data "$REGION" "SNS" "aws sns list-topics" "sns-topics"
     collect_service_data "$REGION" "SQS" "aws sqs list-queues" "sqs-queues"
@@ -92,7 +99,7 @@ for REGION in $REGIONS; do
     collect_service_data "$REGION" "Redshift" "aws redshift describe-clusters" "redshift-clusters"
     collect_service_data "$REGION" "CloudWatch" "aws logs describe-log-groups" "cloudwatch-log-groups"
 
-    # GuardDuty
+    # GuardDuty handling improved to check for detector existence
     local detector_id=$(aws guardduty list-detectors --region "$REGION" --query "DetectorIds[0]" --output text 2>/dev/null)
     if [ -n "$detector_id" ]; then
         collect_service_data "$REGION" "GuardDuty" "aws guardduty list-findings --detector-id $detector_id" "guardduty-findings"
