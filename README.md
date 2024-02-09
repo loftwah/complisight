@@ -10,96 +10,53 @@ CompliSight leverages the latest in automation technology, cloud computing, and 
 
 Our mission is clear: to empower organizations of all sizes to achieve and maintain compliance with confidence, efficiency, and unparalleled insight. Whether you're a startup navigating SOC2 for the first time or a multinational seeking to streamline your compliance processes, CompliSight is your partner in compliance excellence.
 
-**Key Features:**
+### Enhanced AWS Resource Configuration Solutions & SOC2 Considerations
 
-* **Automated Compliance Checks**: Streamline your SOC2 compliance process with automated checks for AWS-hosted applications, ensuring your security, privacy, and integrity standards are met with precision.
-* **Expansive Framework Support**: Beyond SOC2, CompliSight grows with your compliance needs, offering support for GDPR, HIPAA, ISO standards, and more.
-* **Actionable Insights**: Our platform doesn't just identify compliance gaps; it provides clear, actionable guidance to address them, turning compliance challenges into opportunities for improvement.
-* **Continuous Monitoring**: Stay ahead of compliance with continuous monitoring and real-time alerts, ensuring that your organization remains compliant amidst evolving regulations and infrastructure changes.
+#### S3 Bucket Configurations
 
-**Vision**: To capture the untapped potential of automated compliance tools, CompliSight is not just a product but a movement towards a future where compliance empowers businesses rather than encumbers them. We are on a mission to secure millions in value by making compliance accessible, manageable, and insightful for everyone, everywhere.
+- **Policies**: Implement strict access policies using the `aws_s3_bucket_policy` resource in Terraform or AWS CLI commands. Ensure policies enforce encryption with `aws:kms` or AES-256 and restrict public access completely.
+- **Logging**: Enable access logging on all S3 buckets to track requests, using the AWS Management Console or the AWS CLI. This aids in auditing and monitoring activities.
+- **Versioning**: Activate versioning on S3 buckets to protect against unintended deletions or overwrites. Use the AWS Console or CLI to enable this feature, providing a rollback mechanism.
 
-Join us as we pave the way to this future, one compliance check at a time.
+#### AWS Service Configurations
 
-This documentation outlines the SOC2 Compliance Checker CLI tool designed for assessing SOC2 compliance of AWS-hosted Ruby on Rails applications. Utilizing the AWS SDK for Go, this tool automates the process of checking against the SOC2 Trust Services Criteria: Security, Availability, Processing Integrity, Confidentiality, and Privacy.
+- **CloudFormation**: Utilize CloudFormation templates to manage infrastructure, ensuring that all resources are defined in code for repeatable deployments. Validate templates against best practices using AWS CloudFormation Linter.
+- **CloudTrail**: Guarantee that CloudTrail is enabled in all regions and configured to log to a central S3 bucket. Regularly review the trails for coverage and ensure logs are encrypted.
+- **CloudWatch Alarms**: Set up alarms for high usage or unusual activity patterns to identify potential security incidents or system health issues. Use Amazon SNS to notify administrators.
+- **Config Conformance Packs**: Deploy AWS Config rules and conformance packs to automatically audit configurations against SOC2-related AWS best practices.
+- **EC2 Instances**: Regularly audit instance security groups for minimal necessary access ports. Use IAM roles for EC2 to provide necessary permissions without using static credentials.
+- **ElastiCache**: Enable encryption in transit and at rest for ElastiCache to secure sensitive data, following AWS documentation for your cache engine.
+- **GuardDuty**: Monitor and triage GuardDuty findings. Set up automated responses for common findings to enhance security posture.
+- **IAM Roles/Users**: Use the principle of least privilege for IAM roles and users. Regularly review permissions and use AWS IAM Access Advisor to prune unnecessary permissions.
+- **KMS Keys**: Implement automated rotation for KMS keys where possible and audit usage. Ensure that keys are used appropriately for encrypting data in other services.
+- **Lambda**: Secure Lambda functions by restricting their execution role permissions, enabling CloudWatch Logs for monitoring, and using environment variables for sensitive data (encrypted at rest).
+- **RDS Instances**: Ensure databases are encrypted at rest using AWS KMS. Enable automated backups and database logging for auditing purposes.
+- **Secrets Manager**: Automate the rotation of secrets stored in Secrets Manager and ensure that access to secrets is logged and monitored.
+- **VPC Configurations**: Secure VPCs by implementing private subnets for database and application servers, using security groups and NACLs effectively, and enabling VPC Flow Logs for network traffic analysis.
 
-## Features and Commands
+#### Expanded AWS Checks with CompliSight
 
-### **1. Root Command**
+- **Elastic Load Balancing (ELB)**: Verify HTTPS listeners and strong cipher usage for data in transit security.
+- **Amazon ECS & ECR**: Confirm ECS task roles and ECR image scanning for vulnerabilities.
+- **SNS & SQS**: Ensure server-side encryption and access policies are in place for messaging services.
+- **AWS Kinesis**: Check for KMS-based encryption to secure data streams at rest.
+- **DynamoDB**: Validate encryption at rest and access control for stored data.
+- **AWS Redshift**: Assess encryption and access restrictions for data warehousing services.
+- **CloudWatch Log Groups**: Confirm encryption with KMS keys and access control.
 
-* **Features:** Entry point for the application, offering help and general information.
-* **Implementation:** Implemented in `root.go`, leveraging Cobra's help system.
+### GitHub Integration and SOC2-Related Checks
 
-### **2. Security Command**
+- **Repository Security**: Implement branch protection rules and enforce code reviews.
+- **Secret Scanning**: Activate GitHub Advanced Security for detecting exposed secrets.
+- **Dependency Scanning**: Use Dependabot or GitHub Actions for scanning and updating vulnerable dependencies.
+- **Code Analysis**: Apply static code analysis via GitHub Actions to catch security issues pre-merge.
+- **Access Controls & Audit Logs**: Regularly review access levels and monitor audit logs for unusual activities.
 
-* **Features:** Checks IAM policies, S3 bucket settings, and encryption status of RDS and ElastiCache instances.
-* **Implementation:** Resides in `security.go`, utilizing the AWS SDK for interactions.
+### Operational Best Practices for SOC2 Compliance
 
-### **3. Privacy Command**
+- **Regular Compliance Audits**: Utilize AWS Audit Manager and third-party tools for compliance checks.
+- **Employee Training**: Implement ongoing training programs on security awareness and SOC2 compliance.
+- **Documentation**: Maintain up-to-date documentation of policies, procedures, and AWS configurations for SOC2 compliance.
+- **Vendor Management**: Conduct risk assessments on third-party services to ensure they meet SOC2 standards.
 
-* **Features:** Evaluates data handling and encryption practices for personal information.
-* **Implementation:** Found in `privacy.go`, employing AWS SDK to query S3 and IAM configurations.
-
-### **4. Integrity Command**
-
-* **Features:** Monitors unauthorized changes and validates data processing accuracy.
-* **Implementation:** Implemented in `integrity.go`, using AWS CloudTrail and RDS logs.
-
-### **5. Confidentiality Command**
-
-* **Features:** Ensures encryption and access control for confidential data.
-* **Implementation:** Resides in `confidentiality.go`, checking S3, RDS, and IAM settings.
-
-### **6. Availability Command**
-
-* **Features:** Assesses system availability and sets up health monitoring.
-* **Implementation:** Found in `availability.go`, inspecting AWS service configurations.
-
-### **7. Assess Command**
-
-* **Features:** Runs all checks sequentially for a comprehensive compliance assessment.
-* **Implementation:** Potentially in `assess.go`, orchestrating calls to individual checks.
-
-## Usage
-
-### **Configure AWS Credentials**
-
-The AWS SDK for Go requires credentials (AWS access key ID and secret access key) to interact with AWS services. You can configure credentials in several ways:
-
-* **Environment Variables:** Set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`, and optionally, `AWS_SESSION_TOKEN`.
-
-* **Shared Credentials File:** Typically located at `~/.aws/credentials` on Linux and macOS, or `%USERPROFILE%\.aws\credentials` on Windows.
-
-* **IAM Role:** When running on AWS services such as EC2, ECS, or Lambda, you can assign an IAM role with appropriate permissions to the service.
-
-## Reporting and SOC2 Report Types
-
-### **Output and Reporting:**
-
-* After performing checks, the tool outputs reports in a structured format. Consider JSON for machine parsing and detailed human-readable summaries for direct consumption.
-* Reports should highlight compliance status, identify gaps, and suggest remediation steps.
-
-### **Handling SOC2 Type 1 and Type 2 Reports:**
-
-* **Type 1 Report:** Focuses on the suitability of the design of controls at a specific point in time. The tool should provide a snapshot report detailing the current compliance status across all checked criteria.
-
-* **Type 2 Report:** Examines the operational effectiveness of controls over a defined period, typically at least six months. While the tool primarily provides instant checks (akin to Type 1), it can be adapted to support Type 2 by:
-
-  * Integrating with AWS CloudTrail and Config to retrieve historical data.
-  * Offering guidance on tracking changes and maintaining compliance over time.
-
-### **General Structure and Approach:**
-
-* **AWS SDK Integration:** Commands use the AWS SDK for Go to interact with AWS services, ensuring that checks are accurate and based on the latest AWS configurations.
-* **Environment and Configuration:** Users can specify AWS regions and profiles via global flags or a configuration file, tailoring the checks to their specific AWS environment.
-* **Continuous Compliance:** Encourage users to run the tool regularly or integrate it into their CI/CD pipeline for ongoing SOC2 compliance monitoring.
-
-## Getting Started
-
-* **Installation:** Instructions on installing the CLI tool, setting up AWS credentials, and configuring necessary permissions.
-* **Usage:** Examples of common commands, including how to run individual checks and perform a comprehensive assessment with the `assess` command.
-* **Contributing:** Guidelines for contributing to the tool, reporting issues, and suggesting enhancements.
-
-## Conclusion
-
-The SOC2 Compliance Checker CLI tool is designed to simplify the process of SOC2 compliance assessment for AWS-hosted applications, providing valuable insights into the security and compliance posture of Ruby on Rails applications. By automating the evaluation process and offering actionable reports, it aids organizations in maintaining SOC2 compliance efficiently.
+By leveraging CompliSight for comprehensive SOC2 compliance management, organizations can ensure a robust security posture, streamline compliance processes, and foster trust with clients and stakeholders. Continuous monitoring, regular audits, and adherence to best practices are pivotal in maintaining compliance and securing sensitive data across all operational environments.
